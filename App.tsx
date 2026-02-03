@@ -51,6 +51,16 @@ const App: React.FC = () => {
 
       const data = await generateTourDataFromRaw(rawJson, existingSchema);
       
+      // DEBUG: Log the generated data structure
+      console.log("🔍 Gemini Response Structure:", {
+        destination: data.personalized_tour?.destination,
+        duration_days: data.personalized_tour?.duration_days,
+        num_itineraries: data.personalized_tour?.daily_itineraries?.length,
+        first_day_blocks: data.personalized_tour?.daily_itineraries?.[0]?.blocks?.length,
+        first_day_first_block: data.personalized_tour?.daily_itineraries?.[0]?.blocks?.[0],
+        full_itineraries: data.personalized_tour?.daily_itineraries
+      });
+      
       setLoadingStep('Địa lý hóa với Google Maps Grounding...');
       
       const allLocationQueries: string[] = [];
@@ -80,9 +90,9 @@ const App: React.FC = () => {
         if (placeResult) queryToPlaceMap.set(query, placeResult);
       });
 
-      const updatedItineraries = itineraries.map(day => ({
-        ...day,
-        blocks: (day.blocks || []).map(block => ({
+      const updatedItineraries = itineraries.map(day => {
+        // Ensure blocks exist with places
+        const blocks = (day.blocks || []).map(block => ({
           ...block,
           places: (block.places || []).map(p => {
             const geoInfo = queryToPlaceMap.get(p.name);
@@ -95,8 +105,22 @@ const App: React.FC = () => {
               provider: geoInfo?.source || p.provider
             };
           })
-        }))
-      }));
+        }));
+        
+        // If no blocks or blocks are empty, return day as-is to show empty state
+        return {
+          ...day,
+          blocks: blocks.length > 0 ? blocks : [
+            { block_type: "breakfast", time_range: "07:00 - 09:00", places: [] },
+            { block_type: "morning", time_range: "09:00 - 12:00", places: [] },
+            { block_type: "lunch", time_range: "12:00 - 14:00", places: [] },
+            { block_type: "afternoon", time_range: "14:00 - 18:00", places: [] },
+            { block_type: "dinner", time_range: "18:00 - 20:00", places: [] },
+            { block_type: "evening", time_range: "20:00 - 22:00", places: [] },
+            { block_type: "hotel", time_range: "22:00 - 07:00", places: [] }
+          ]
+        };
+      });
 
       const finalData: GeneratedData = {
         ...data,

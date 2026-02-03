@@ -357,6 +357,23 @@ export const generateTourDataFromRaw = async (rawJson: any, existingSchema?: any
   const personalized_tour = parsedResponse.personalized_tour || {};
   if (!personalized_tour.daily_itineraries) personalized_tour.daily_itineraries = [];
 
+  // CRITICAL FIX: Ensure each day has blocks array
+  personalized_tour.daily_itineraries = personalized_tour.daily_itineraries.map((day: any) => {
+    if (!day.blocks || !Array.isArray(day.blocks) || day.blocks.length === 0) {
+      // Create default blocks if missing
+      day.blocks = [
+        { block_type: "breakfast", time_range: "07:00 - 09:00", places: [] },
+        { block_type: "morning", time_range: "09:00 - 12:00", places: [] },
+        { block_type: "lunch", time_range: "12:00 - 14:00", places: [] },
+        { block_type: "afternoon", time_range: "14:00 - 18:00", places: [] },
+        { block_type: "dinner", time_range: "18:00 - 20:00", places: [] },
+        { block_type: "evening", time_range: "20:00 - 22:00", places: [] },
+        { block_type: "hotel", time_range: "22:00 - 07:00", places: [] }
+      ];
+    }
+    return day;
+  });
+
   return {
     metadata: {
       version: "1.5.1",

@@ -282,12 +282,13 @@ const ResultView: React.FC<Props> = ({ data, history, onSelectHistory, activeInd
                           </div>
 
                           <div className="grid grid-cols-1 gap-4">
-                            {block.places.map((place, pIdx) => (
-                              <div key={pIdx} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
-                                <div className="flex justify-between items-start mb-3">
-                                  <div>
-                                    <h6 className="font-black text-slate-800 text-base flex items-center gap-2">
-                                      {place.name}
+                            {block.places && block.places.length > 0 ? (
+                              block.places.map((place, pIdx) => (
+                                <div key={pIdx} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                                  <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                      <h6 className="font-black text-slate-800 text-base flex items-center gap-2">
+                                        {place.name}
                                       {place.google_maps_uri && (
                                         <a href={place.google_maps_uri} target="_blank" rel="noreferrer" title="Grounded Google Map" className="text-blue-500 hover:text-blue-700">
                                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -325,7 +326,13 @@ const ResultView: React.FC<Props> = ({ data, history, onSelectHistory, activeInd
                                   </div>
                                 )}
                               </div>
-                            ))}
+                              ))
+                            ) : (
+                              <div className="bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl p-6 text-center">
+                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Chưa có địa điểm trong block này</p>
+                                <p className="text-[9px] text-slate-300 mt-1">Hành trình sẽ được cập nhật từ Gemini</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
